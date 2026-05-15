@@ -11,6 +11,7 @@ public:
     int value() const;
     void merge(const GCounter& other);
     const std::vector<int>& state() const;
+    int slot(int index) const { return counts[index]; }
     int nodeId() const { return id; }
     int numNodes() const { return static_cast<int>(counts.size()); }
 private:
