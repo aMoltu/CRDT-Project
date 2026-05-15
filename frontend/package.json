@@ -4,8 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "generate": "node ../scripts/generate-bindings.mjs",
-    "build:wasm": "npm run generate && docker compose run --rm wasm-build",
+    "build:wasm": "docker compose run --rm wasm-build",
     "dev": "vite",
     "dev:fresh": "npm run build:wasm && vite",
     "build": "npm run build:wasm && tsc -b && vite build",

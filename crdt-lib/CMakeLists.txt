@@ -4,19 +4,20 @@ project(crdt-lib CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# bindings.cpp uses Emscripten headers — exclude from the native library.
 file(GLOB CRDT_SOURCES "src/*.cpp")
+list(REMOVE_ITEM CRDT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/bindings.cpp")
 
 add_library(crdt STATIC ${CRDT_SOURCES})
 target_include_directories(crdt PUBLIC include)
 
 if(EMSCRIPTEN)
-    add_executable(crdt_wasm ${CRDT_SOURCES})
+    add_executable(crdt_wasm ${CRDT_SOURCES} src/bindings.cpp)
     target_include_directories(crdt_wasm PRIVATE include)
     target_link_options(crdt_wasm PRIVATE
         "SHELL:-s MODULARIZE=1"
         "SHELL:-s EXPORT_NAME='CRDTModule'"
-        "SHELL:-s EXPORTED_FUNCTIONS=[\"_gcounter_create\",\"_gcounter_destroy\",\"_gcounter_increment\",\"_gcounter_value\",\"_gcounter_merge\",\"_gcounter_slot\",\"_gcounter_node_id\",\"_gcounter_num_nodes\"]"
-        "SHELL:-s EXPORTED_RUNTIME_METHODS=[\"cwrap\",\"ccall\"]"
+        "--bind"
         "SHELL:-s ALLOW_MEMORY_GROWTH=1"
         "--no-entry"
     )

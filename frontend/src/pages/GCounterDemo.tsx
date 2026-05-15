@@ -33,8 +33,8 @@ export default function GCounterDemo() {
       .catch(e => setError(String(e)))
 
     return () => {
-      aRef.current?.destroy()
-      bRef.current?.destroy()
+      aRef.current?.delete()
+      bRef.current?.delete()
     }
   }, [])
 
@@ -60,13 +60,13 @@ export default function GCounterDemo() {
 
   function incrementA() {
     if (!aRef.current) return
-    aRef.current.increment()
+    aRef.current.increment(1)
     setAState(readState(aRef.current))
   }
 
   function incrementB() {
     if (!bRef.current) return
-    bRef.current.increment()
+    bRef.current.increment(1)
     setBState(readState(bRef.current))
   }
 
