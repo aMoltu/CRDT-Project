@@ -8,7 +8,6 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/src/crdt-lib/src/crdt_c_api.cpp" "CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o" "gcc" "CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o.d"
   "/src/crdt-lib/src/gcounter.cpp" "CMakeFiles/crdt.dir/src/gcounter.cpp.o" "gcc" "CMakeFiles/crdt.dir/src/gcounter.cpp.o.d"
   )
 

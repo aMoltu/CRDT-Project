@@ -83,30 +83,30 @@ CMakeFiles/crdt_wasm.dir/src/gcounter.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/crdt_wasm.dir/src/gcounter.cpp.s"
 	/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/crdt-lib/src/gcounter.cpp -o CMakeFiles/crdt_wasm.dir/src/gcounter.cpp.s
 
-CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.o: CMakeFiles/crdt_wasm.dir/flags.make
-CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.o: /src/crdt-lib/src/crdt_c_api.cpp
-CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.o: CMakeFiles/crdt_wasm.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/src/crdt-lib/build-wasm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.o"
-	/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.o -MF CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.o.d -o CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.o -c /src/crdt-lib/src/crdt_c_api.cpp
+CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o: CMakeFiles/crdt_wasm.dir/flags.make
+CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o: /src/crdt-lib/src/bindings.cpp
+CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o: CMakeFiles/crdt_wasm.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/src/crdt-lib/build-wasm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o"
+	/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o -MF CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o.d -o CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o -c /src/crdt-lib/src/bindings.cpp
 
-CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.i"
-	/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/crdt-lib/src/crdt_c_api.cpp > CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.i
+CMakeFiles/crdt_wasm.dir/src/bindings.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/crdt_wasm.dir/src/bindings.cpp.i"
+	/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/crdt-lib/src/bindings.cpp > CMakeFiles/crdt_wasm.dir/src/bindings.cpp.i
 
-CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.s"
-	/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/crdt-lib/src/crdt_c_api.cpp -o CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.s
+CMakeFiles/crdt_wasm.dir/src/bindings.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/crdt_wasm.dir/src/bindings.cpp.s"
+	/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/crdt-lib/src/bindings.cpp -o CMakeFiles/crdt_wasm.dir/src/bindings.cpp.s
 
 # Object files for target crdt_wasm
 crdt_wasm_OBJECTS = \
 "CMakeFiles/crdt_wasm.dir/src/gcounter.cpp.o" \
-"CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.o"
+"CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o"
 
 # External object files for target crdt_wasm
 crdt_wasm_EXTERNAL_OBJECTS =
 
 crdt_wasm.js: CMakeFiles/crdt_wasm.dir/src/gcounter.cpp.o
-crdt_wasm.js: CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.o
+crdt_wasm.js: CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o
 crdt_wasm.js: CMakeFiles/crdt_wasm.dir/build.make
 crdt_wasm.js: CMakeFiles/crdt_wasm.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/src/crdt-lib/build-wasm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable crdt_wasm.js"

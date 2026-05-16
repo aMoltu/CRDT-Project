@@ -142,32 +142,29 @@ crdt_wasm/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/crdt_wasm.dir/build.make CMakeFiles/crdt_wasm.dir/build
 .PHONY : crdt_wasm/fast
 
-src/crdt_c_api.o: src/crdt_c_api.cpp.o
-.PHONY : src/crdt_c_api.o
+src/bindings.o: src/bindings.cpp.o
+.PHONY : src/bindings.o
 
 # target to build an object file
-src/crdt_c_api.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/crdt.dir/build.make CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/crdt_wasm.dir/build.make CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.o
-.PHONY : src/crdt_c_api.cpp.o
+src/bindings.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/crdt_wasm.dir/build.make CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o
+.PHONY : src/bindings.cpp.o
 
-src/crdt_c_api.i: src/crdt_c_api.cpp.i
-.PHONY : src/crdt_c_api.i
+src/bindings.i: src/bindings.cpp.i
+.PHONY : src/bindings.i
 
 # target to preprocess a source file
-src/crdt_c_api.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/crdt.dir/build.make CMakeFiles/crdt.dir/src/crdt_c_api.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/crdt_wasm.dir/build.make CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.i
-.PHONY : src/crdt_c_api.cpp.i
+src/bindings.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/crdt_wasm.dir/build.make CMakeFiles/crdt_wasm.dir/src/bindings.cpp.i
+.PHONY : src/bindings.cpp.i
 
-src/crdt_c_api.s: src/crdt_c_api.cpp.s
-.PHONY : src/crdt_c_api.s
+src/bindings.s: src/bindings.cpp.s
+.PHONY : src/bindings.s
 
 # target to generate assembly for a file
-src/crdt_c_api.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/crdt.dir/build.make CMakeFiles/crdt.dir/src/crdt_c_api.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/crdt_wasm.dir/build.make CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.s
-.PHONY : src/crdt_c_api.cpp.s
+src/bindings.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/crdt_wasm.dir/build.make CMakeFiles/crdt_wasm.dir/src/bindings.cpp.s
+.PHONY : src/bindings.cpp.s
 
 src/gcounter.o: src/gcounter.cpp.o
 .PHONY : src/gcounter.o
@@ -206,9 +203,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... crdt"
 	@echo "... crdt_wasm"
-	@echo "... src/crdt_c_api.o"
-	@echo "... src/crdt_c_api.i"
-	@echo "... src/crdt_c_api.s"
+	@echo "... src/bindings.o"
+	@echo "... src/bindings.i"
+	@echo "... src/bindings.s"
 	@echo "... src/gcounter.o"
 	@echo "... src/gcounter.i"
 	@echo "... src/gcounter.s"

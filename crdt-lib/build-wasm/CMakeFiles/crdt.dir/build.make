@@ -83,33 +83,17 @@ CMakeFiles/crdt.dir/src/gcounter.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/crdt.dir/src/gcounter.cpp.s"
 	/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/crdt-lib/src/gcounter.cpp -o CMakeFiles/crdt.dir/src/gcounter.cpp.s
 
-CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o: CMakeFiles/crdt.dir/flags.make
-CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o: /src/crdt-lib/src/crdt_c_api.cpp
-CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o: CMakeFiles/crdt.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/src/crdt-lib/build-wasm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o"
-	/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o -MF CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o.d -o CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o -c /src/crdt-lib/src/crdt_c_api.cpp
-
-CMakeFiles/crdt.dir/src/crdt_c_api.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/crdt.dir/src/crdt_c_api.cpp.i"
-	/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/crdt-lib/src/crdt_c_api.cpp > CMakeFiles/crdt.dir/src/crdt_c_api.cpp.i
-
-CMakeFiles/crdt.dir/src/crdt_c_api.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/crdt.dir/src/crdt_c_api.cpp.s"
-	/emsdk/upstream/emscripten/em++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/crdt-lib/src/crdt_c_api.cpp -o CMakeFiles/crdt.dir/src/crdt_c_api.cpp.s
-
 # Object files for target crdt
 crdt_OBJECTS = \
-"CMakeFiles/crdt.dir/src/gcounter.cpp.o" \
-"CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o"
+"CMakeFiles/crdt.dir/src/gcounter.cpp.o"
 
 # External object files for target crdt
 crdt_EXTERNAL_OBJECTS =
 
 libcrdt.a: CMakeFiles/crdt.dir/src/gcounter.cpp.o
-libcrdt.a: CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o
 libcrdt.a: CMakeFiles/crdt.dir/build.make
 libcrdt.a: CMakeFiles/crdt.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/src/crdt-lib/build-wasm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libcrdt.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/src/crdt-lib/build-wasm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX static library libcrdt.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/crdt.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/crdt.dir/link.txt --verbose=$(VERBOSE)
 

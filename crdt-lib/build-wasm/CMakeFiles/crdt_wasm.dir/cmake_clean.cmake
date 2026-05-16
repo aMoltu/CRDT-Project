@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.o"
-  "CMakeFiles/crdt_wasm.dir/src/crdt_c_api.cpp.o.d"
+  "CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o"
+  "CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o.d"
   "CMakeFiles/crdt_wasm.dir/src/gcounter.cpp.o"
   "CMakeFiles/crdt_wasm.dir/src/gcounter.cpp.o.d"
   "crdt_wasm.js"

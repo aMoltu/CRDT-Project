@@ -1,6 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o"
-  "CMakeFiles/crdt.dir/src/crdt_c_api.cpp.o.d"
   "CMakeFiles/crdt.dir/src/gcounter.cpp.o"
   "CMakeFiles/crdt.dir/src/gcounter.cpp.o.d"
   "libcrdt.a"
