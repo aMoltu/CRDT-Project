@@ -4,75 +4,85 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createGCounter, type GCounterHandle } from '@/lib/crdt'
 
+const N = 3
+const LABELS = ['A', 'B', 'C'] as const
+
 interface NodeState {
   value: number
-  slots: [number, number]
+  slots: [number, number, number]
 }
 
-function readState(counter: GCounterHandle): NodeState {
+const EMPTY: NodeState = { value: 0, slots: [0, 0, 0] }
+
+function readState(c: GCounterHandle): NodeState {
   return {
-    value: counter.value(),
-    slots: [counter.slot(0), counter.slot(1)],
+    value: c.value(),
+    slots: [c.slot(0), c.slot(1), c.slot(2)],
   }
 }
 
 export default function GCounterDemo() {
   const navigate = useNavigate()
-  const aRef = useRef<GCounterHandle | null>(null)
-  const bRef = useRef<GCounterHandle | null>(null)
-
-  const [aState, setAState] = useState<NodeState>({ value: 0, slots: [0, 0] })
-  const [bState, setBState] = useState<NodeState>({ value: 0, slots: [0, 0] })
+  const refs = useRef<(GCounterHandle | null)[]>([null, null, null])
+  const [states, setStates] = useState<NodeState[]>([EMPTY, EMPTY, EMPTY])
   const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    createGCounter(0, 2)
-      .then(a => { aRef.current = a; return createGCounter(1, 2) })
-      .then(b => { bRef.current = b; setReady(true) })
-      .catch(e => setError(String(e)))
+  function refresh() {
+    setStates(refs.current.map(r => r ? readState(r) : EMPTY))
+  }
 
-    return () => {
-      aRef.current?.delete()
-      bRef.current?.delete()
+  async function init() {
+    try {
+      const counters = await Promise.all(
+        Array.from({ length: N }, (_, i) => createGCounter(i, N))
+      )
+      refs.current = counters
+      refresh()
+      setReady(true)
+    } catch (e) {
+      setError(String(e))
     }
+  }
+
+  useEffect(() => {
+    init()
+    return () => { refs.current.forEach(r => r?.delete()) }
   }, [])
 
-  function syncA() {
-    if (!aRef.current || !bRef.current) return
-    aRef.current.merge(bRef.current)
-    setAState(readState(aRef.current))
+  function increment(i: number) {
+    refs.current[i]?.increment(1)
+    refresh()
   }
 
-  function syncB() {
-    if (!aRef.current || !bRef.current) return
-    bRef.current.merge(aRef.current)
-    setBState(readState(bRef.current))
+  function mergeInto(target: number, source: number) {
+    const t = refs.current[target]
+    const s = refs.current[source]
+    if (t && s) { t.merge(s); refresh() }
   }
 
-  function syncBoth() {
-    if (!aRef.current || !bRef.current) return
-    aRef.current.merge(bRef.current)
-    bRef.current.merge(aRef.current)
-    setAState(readState(aRef.current))
-    setBState(readState(bRef.current))
+  function syncAll() {
+    const live = refs.current.filter(Boolean) as GCounterHandle[]
+    if (live.length < N) return
+    // two rounds ensures full convergence regardless of order
+    for (let pass = 0; pass < 2; pass++)
+      for (const t of live)
+        for (const s of live)
+          if (t !== s) t.merge(s)
+    refresh()
   }
 
-  function incrementA() {
-    if (!aRef.current) return
-    aRef.current.increment(1)
-    setAState(readState(aRef.current))
+  async function reset() {
+    refs.current.forEach(r => r?.delete())
+    refs.current = [null, null, null]
+    setStates([EMPTY, EMPTY, EMPTY])
+    setReady(false)
+    await init()
   }
 
-  function incrementB() {
-    if (!bRef.current) return
-    bRef.current.increment(1)
-    setBState(readState(bRef.current))
-  }
-
-  const inSync =
-    aState.slots[0] === bState.slots[0] &&
-    aState.slots[1] === bState.slots[1]
+  const inSync = states.every(s =>
+    s.slots.every((v, i) => v === states[0].slots[i])
+  )
 
   if (error) return (
     <div className="flex items-center justify-center min-h-screen text-destructive">
@@ -82,7 +92,7 @@ export default function GCounterDemo() {
 
   return (
     <div className="flex flex-col items-center min-h-screen gap-8 p-8">
-      <div className="flex items-center justify-between w-full max-w-2xl">
+      <div className="flex items-center justify-between w-full max-w-3xl">
         <Button variant="ghost" onClick={() => navigate('/')}>← Back</Button>
         <h1 className="text-2xl font-bold">G-Counter</h1>
         <div className="w-16" />
@@ -97,44 +107,33 @@ export default function GCounterDemo() {
         <p className="text-muted-foreground">Loading WASM module...</p>
       ) : (
         <>
-          <div className="flex gap-6 w-full max-w-2xl">
-            <Card className="flex-1">
-              <CardHeader>
-                <CardTitle className="text-center">Node A</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center gap-4">
-                <div className="text-5xl font-mono font-bold">{aState.value}</div>
-                <div className="text-xs text-muted-foreground font-mono">
-                  [{aState.slots[0]}, {aState.slots[1]}]
-                </div>
-                <Button onClick={incrementA} className="w-full">+ Increment</Button>
-                <Button onClick={syncA} variant="outline" className="w-full">
-                  ↙ Merge from B
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="flex-1">
-              <CardHeader>
-                <CardTitle className="text-center">Node B</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center gap-4">
-                <div className="text-5xl font-mono font-bold">{bState.value}</div>
-                <div className="text-xs text-muted-foreground font-mono">
-                  [{bState.slots[0]}, {bState.slots[1]}]
-                </div>
-                <Button onClick={incrementB} className="w-full">+ Increment</Button>
-                <Button onClick={syncB} variant="outline" className="w-full">
-                  ↘ Merge from A
-                </Button>
-              </CardContent>
-            </Card>
+          <div className="flex gap-4 w-full max-w-3xl">
+            {([0, 1, 2] as const).map(i => (
+              <Card key={i} className="flex-1">
+                <CardHeader>
+                  <CardTitle className="text-center">Node {LABELS[i]}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center gap-3">
+                  <div className="text-5xl font-mono font-bold">{states[i].value}</div>
+                  <div className="text-xs text-muted-foreground font-mono">
+                    [{states[i].slots.join(', ')}]
+                  </div>
+                  <Button onClick={() => increment(i)} className="w-full">+ Increment</Button>
+                  {([0, 1, 2] as const).filter(j => j !== i).map(j => (
+                    <Button key={j} onClick={() => mergeInto(i, j)} variant="outline" className="w-full">
+                      Merge from {LABELS[j]}
+                    </Button>
+                  ))}
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           <div className="flex flex-col items-center gap-2">
-            <Button onClick={syncBoth} variant="secondary" size="lg">
-              ⇄ Sync Both
-            </Button>
+            <div className="flex gap-3">
+              <Button onClick={syncAll} variant="secondary" size="lg">⇄ Sync All</Button>
+              <Button onClick={reset} variant="outline" size="lg">↺ Reset</Button>
+            </div>
             <span className={`text-xs font-medium ${inSync ? 'text-green-500' : 'text-amber-500'}`}>
               {inSync ? 'Nodes are in sync' : 'Nodes have diverged'}
             </span>
