@@ -1,6 +1,7 @@
 #include <emscripten/bind.h>
 #include "gcounter.hpp"
 #include "gset.hpp"
+#include "rga.hpp"
 #include "line_segment.hpp"
 
 using namespace emscripten;
@@ -18,7 +19,7 @@ EMSCRIPTEN_BINDINGS(crdt) {
         .function("nodeId",    &GCounter::nodeId)
         .function("numNodes",  &GCounter::numNodes);
 
-    // ── LineSegment (used for GSet) ────────────────────
+    // ── LineSegment (used for GSet and ORSet) ─────────────────────────────────
 
     value_object<LineSegment>("LineSegment")
         .field("x1",    &LineSegment::x1)
@@ -30,7 +31,6 @@ EMSCRIPTEN_BINDINGS(crdt) {
         .field("b",     &LineSegment::b)
         .field("width", &LineSegment::width);
 
-    // Needed so embind can return std::vector<LineSegment> from state()
     register_vector<LineSegment>("VectorLineSegment");
 
     // ── GSet<LineSegment> ─────────────────────────────────────────────────────
@@ -41,4 +41,17 @@ EMSCRIPTEN_BINDINGS(crdt) {
         .function("merge",  &GSet<LineSegment>::merge)
         .function("size",   &GSet<LineSegment>::size)
         .function("state",  &GSet<LineSegment>::state);
+
+    // ── RGA ───────────────────────────────────────────────────────────────────
+
+    class_<RGA>("RGA")
+        .constructor<int>()
+        .function("insert",          &RGA::insert)
+        .function("remove_at",       &RGA::remove_at)
+        .function("merge",           &RGA::merge)
+        .function("text",            &RGA::text)
+        .function("left_node_id_at", &RGA::left_node_id_at)
+        .function("left_seq_at",     &RGA::left_seq_at)
+        .function("get_node_id",     &RGA::get_node_id)
+        .function("chars_json",      &RGA::chars_json);
 }

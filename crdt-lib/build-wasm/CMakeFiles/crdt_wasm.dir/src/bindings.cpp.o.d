@@ -676,4 +676,4 @@ CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o: \
   /emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__type_traits/is_execution_policy.h \
   /src/crdt-lib/include/gset.hpp \
   /emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/set \
-  /src/crdt-lib/include/line_segment.hpp
+  /src/crdt-lib/include/rga.hpp /src/crdt-lib/include/line_segment.hpp

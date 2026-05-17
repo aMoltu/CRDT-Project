@@ -47,3 +47,22 @@ export async function createGSet(): Promise<GSetHandle> {
   const M = await loadModule()
   return new M.GSet() as GSetHandle
 }
+
+// ── RGA ───────────────────────────────────────────────────────────────────────
+
+export interface RGAHandle {
+  insert:          (leftNodeId: number, leftSeq: number, value: string) => void
+  remove_at:       (visualPos: number) => void
+  merge:           (other: RGAHandle) => void
+  text:            () => string
+  left_node_id_at: (k: number) => number
+  left_seq_at:     (k: number) => number
+  get_node_id:     () => number
+  chars_json:      () => string
+  delete:          () => void
+}
+
+export async function createRGA(nodeId: number): Promise<RGAHandle> {
+  const M = await loadModule()
+  return new M.RGA(nodeId) as RGAHandle
+}

@@ -14,6 +14,9 @@ export default function Home() {
       <Button size="lg" variant="outline" onClick={() => navigate('/gset')}>
         G-Set Canvas Demo
       </Button>
+      <Button size="lg" variant="outline" onClick={() => navigate('/rga')}>
+        RGA Text Editor Demo
+      </Button>
     </div>
   )
 }
