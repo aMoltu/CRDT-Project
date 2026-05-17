@@ -1,0 +1,14 @@
+# CMake build directories
+crdt-lib/build-wasm/
+crdt-lib/build/
+build/
+
+# C++ artifacts
+*.o
+*.a
+*.so
+*.d
+
+# OS
+.DS_Store
+Thumbs.db

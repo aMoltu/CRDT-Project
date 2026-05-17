@@ -1,4 +1,0 @@
-/src/crdt-lib/build-wasm/CMakeFiles/crdt.dir
-/src/crdt-lib/build-wasm/CMakeFiles/crdt_wasm.dir
-/src/crdt-lib/build-wasm/CMakeFiles/edit_cache.dir
-/src/crdt-lib/build-wasm/CMakeFiles/rebuild_cache.dir

@@ -1,1 +1,0 @@
-/emsdk/upstream/emscripten/em++ -s MODULARIZE=1 -s EXPORT_NAME=CRDTModule --bind -s ALLOW_MEMORY_GROWTH=1 --no-entry CMakeFiles/crdt_wasm.dir/src/gcounter.cpp.o CMakeFiles/crdt_wasm.dir/src/bindings.cpp.o -o crdt_wasm.js 
