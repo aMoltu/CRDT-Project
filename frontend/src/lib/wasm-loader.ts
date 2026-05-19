@@ -7,7 +7,7 @@ export function loadModule(): Promise<WasmModule> {
   if (modulePromise) return modulePromise
   modulePromise = new Promise((resolve, reject) => {
     const script = document.createElement('script')
-    script.src = '/crdt_wasm.js'
+    script.src = import.meta.env.BASE_URL + 'crdt_wasm.js'
     script.onload = async () => {
       try { resolve(await (window as unknown as Window & { CRDTModule: () => Promise<WasmModule> }).CRDTModule()) }
       catch (e) { reject(e) }
