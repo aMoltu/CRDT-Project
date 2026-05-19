@@ -32,21 +32,14 @@ export default function GCounterDemo() {
     setStates(refs.current.map(r => r ? readState(r) : EMPTY))
   }
 
-  async function init() {
-    try {
-      const counters = await Promise.all(
-        Array.from({ length: N }, (_, i) => createGCounter(i, N))
-      )
-      refs.current = counters
-      refresh()
-      setReady(true)
-    } catch (e) {
-      setError(String(e))
-    }
-  }
-
   useEffect(() => {
-    init()
+    Promise.all(Array.from({ length: N }, (_, i) => createGCounter(i, N)))
+      .then(counters => {
+        refs.current = counters
+        setStates(counters.map(readState))
+        setReady(true)
+      })
+      .catch(e => setError(String(e)))
     return () => { refs.current.forEach(r => r?.delete()) }
   }, [])
 
@@ -77,7 +70,14 @@ export default function GCounterDemo() {
     refs.current = [null, null, null]
     setStates([EMPTY, EMPTY, EMPTY])
     setReady(false)
-    await init()
+    try {
+      const counters = await Promise.all(Array.from({ length: N }, (_, i) => createGCounter(i, N)))
+      refs.current = counters
+      setStates(counters.map(readState))
+      setReady(true)
+    } catch (e) {
+      setError(String(e))
+    }
   }
 
   const inSync = states.every(s =>

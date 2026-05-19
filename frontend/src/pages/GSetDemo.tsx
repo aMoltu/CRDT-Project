@@ -122,19 +122,14 @@ export default function GSetDemo() {
     setStates(refs.current.map(r => r ? readState(r) : EMPTY))
   }
 
-  async function init() {
-    try {
-      const sets = await Promise.all(Array.from({ length: N }, () => createGSet()))
-      refs.current = sets
-      refresh()
-      setReady(true)
-    } catch (e) {
-      setError(String(e))
-    }
-  }
-
   useEffect(() => {
-    init()
+    Promise.all(Array.from({ length: N }, () => createGSet()))
+      .then(sets => {
+        refs.current = sets
+        setStates(sets.map(readState))
+        setReady(true)
+      })
+      .catch(e => setError(String(e)))
     return () => { refs.current.forEach(r => r?.delete()) }
   }, [])
 
@@ -168,7 +163,14 @@ export default function GSetDemo() {
     refs.current = [null, null, null]
     setStates([EMPTY, EMPTY, EMPTY])
     setReady(false)
-    await init()
+    try {
+      const sets = await Promise.all(Array.from({ length: N }, () => createGSet()))
+      refs.current = sets
+      setStates(sets.map(readState))
+      setReady(true)
+    } catch (e) {
+      setError(String(e))
+    }
   }
 
   const inSync = states.every(s => s.segments.length === states[0].segments.length)

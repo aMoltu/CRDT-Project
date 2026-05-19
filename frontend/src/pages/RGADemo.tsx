@@ -32,19 +32,14 @@ export default function RGADemo() {
     })
   }
 
-  async function init() {
-    try {
-      const rgas = await Promise.all(Array.from({ length: N }, (_, i) => createRGA(i)))
-      refs.current = rgas
-      refresh()
-      setReady(true)
-    } catch (e) {
-      setError(String(e))
-    }
-  }
-
   useEffect(() => {
-    init()
+    Promise.all(Array.from({ length: N }, (_, i) => createRGA(i)))
+      .then(rgas => {
+        refs.current = rgas
+        setTexts(rgas.map(r => r.text()))
+        setReady(true)
+      })
+      .catch(e => setError(String(e)))
     return () => { refs.current.forEach(r => r?.delete()) }
   }, [])
 
@@ -142,7 +137,14 @@ export default function RGADemo() {
     refs.current = [null, null, null]
     setTexts(['', '', ''])
     setReady(false)
-    await init()
+    try {
+      const rgas = await Promise.all(Array.from({ length: N }, (_, i) => createRGA(i)))
+      refs.current = rgas
+      setTexts(rgas.map(r => r.text()))
+      setReady(true)
+    } catch (e) {
+      setError(String(e))
+    }
   }
 
   const inSync = texts.every(t => t === texts[0])
