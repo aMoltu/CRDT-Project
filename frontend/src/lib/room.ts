@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 
 export type ConnectionStatus = 'offline' | 'connecting' | 'connected' | 'partitioned'
 
@@ -28,7 +28,7 @@ export function useConnection(
   const sendQueue   = useRef<unknown[]>([])   // outgoing ops queued during partition
   const recvBuffer  = useRef<unknown[]>([])   // incoming messages buffered during partition
   const onMsgRef    = useRef(onMessage)
-  onMsgRef.current  = onMessage               // always call the latest handler
+  useLayoutEffect(() => { onMsgRef.current = onMessage })
 
   useEffect(() => {
     const socket = new WebSocket(`${WS_BASE}${path}`)

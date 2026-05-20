@@ -51,12 +51,12 @@ export default function GSetOnline() {
       segments.current = [...segments.current, msg.seg]
       repaint()
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   const connection = useConnection('/gset', onMessage)
 
   // Redraw whenever canvas mounts (e.g. after ready flips to true)
-  useEffect(() => { if (ready) repaint() }, [ready]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (ready) repaint() }, [ready])
 
   function getPos(e: React.MouseEvent<HTMLCanvasElement>) {
     const rect = canvasRef.current!.getBoundingClientRect()
