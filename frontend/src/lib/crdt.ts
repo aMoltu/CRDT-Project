@@ -51,15 +51,21 @@ export async function createGSet(): Promise<GSetHandle> {
 // ── RGA ───────────────────────────────────────────────────────────────────────
 
 export interface RGAHandle {
-  insert:          (leftNodeId: number, leftSeq: number, value: string) => void
-  remove_at:       (visualPos: number) => void
-  merge:           (other: RGAHandle) => void
-  text:            () => string
-  left_node_id_at: (k: number) => number
-  left_seq_at:     (k: number) => number
-  get_node_id:     () => number
-  chars_json:      () => string
-  delete:          () => void
+  insert:               (leftNodeId: number, leftSeq: number, value: string) => void
+  insert_remote:        (leftNodeId: number, leftSeq: number, value: string, nodeId: number, seq: number, lamport: number) => void
+  remove_at:            (visualPos: number) => void
+  remove_by_id:         (nodeId: number, seq: number) => void
+  merge:                (other: RGAHandle) => void
+  text:                 () => string
+  left_node_id_at:      (k: number) => number
+  left_seq_at:          (k: number) => number
+  node_id_at:           (k: number) => number
+  seq_at:               (k: number) => number
+  get_node_id:          () => number
+  last_insert_seq:      () => number
+  last_insert_lamport:  () => number
+  chars_json:           () => string
+  delete:               () => void
 }
 
 export async function createRGA(nodeId: number): Promise<RGAHandle> {

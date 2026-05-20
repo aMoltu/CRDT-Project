@@ -46,12 +46,18 @@ EMSCRIPTEN_BINDINGS(crdt) {
 
     class_<RGA>("RGA")
         .constructor<int>()
-        .function("insert",          &RGA::insert)
-        .function("remove_at",       &RGA::remove_at)
-        .function("merge",           &RGA::merge)
-        .function("text",            &RGA::text)
-        .function("left_node_id_at", &RGA::left_node_id_at)
-        .function("left_seq_at",     &RGA::left_seq_at)
-        .function("get_node_id",     &RGA::get_node_id)
-        .function("chars_json",      &RGA::chars_json);
+        .function("insert",               &RGA::insert)
+        .function("insert_remote",        &RGA::insert_remote)
+        .function("remove_at",            &RGA::remove_at)
+        .function("remove_by_id",         &RGA::remove_by_id)
+        .function("merge",                &RGA::merge)
+        .function("text",                 &RGA::text)
+        .function("left_node_id_at",      &RGA::left_node_id_at)
+        .function("left_seq_at",          &RGA::left_seq_at)
+        .function("node_id_at",           &RGA::node_id_at)
+        .function("seq_at",               &RGA::seq_at)
+        .function("get_node_id",          &RGA::get_node_id)
+        .function("last_insert_seq",      &RGA::last_insert_seq)
+        .function("last_insert_lamport",  &RGA::last_insert_lamport)
+        .function("chars_json",           &RGA::chars_json);
 }

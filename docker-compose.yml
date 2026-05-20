@@ -9,3 +9,12 @@ services:
              cd build-wasm &&
              emcmake cmake .. &&
              emmake make"
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080

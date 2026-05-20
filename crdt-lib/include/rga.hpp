@@ -16,22 +16,41 @@ struct RGAChar {
 
 class RGA {
 public:
-    explicit RGA(int node_id) : node_id_(node_id), next_seq_(0), clock_(0) {}
+    explicit RGA(int node_id)
+        : node_id_(node_id), next_seq_(0), clock_(0),
+          last_seq_(-1), last_lamport_(-1) {}
 
+    // Local insert. Call last_insert_seq() / last_insert_lamport() afterwards
+    // to get the assigned IDs for broadcasting over the network.
     void insert(int left_node_id, int left_seq, const std::string& value) {
         if (value.empty()) return;
         RGAChar c{ node_id_, next_seq_++, ++clock_, left_node_id, left_seq, value[0], false };
+        last_seq_     = c.seq;
+        last_lamport_ = c.lamport;
         place(c);
     }
 
+    // Apply a remotely-originated insert with a known stable ID. Idempotent.
+    void insert_remote(int left_node_id, int left_seq, const std::string& value,
+                       int node_id, int seq, int lamport) {
+        if (value.empty() || has(node_id, seq)) return;
+        RGAChar c{ node_id, seq, lamport, left_node_id, left_seq, value[0], false };
+        clock_ = std::max(clock_, lamport);
+        place(c);
+    }
+
+    // Local remove by visual position.
     void remove_at(int k) {
         int count = -1;
         for (auto& c : chars_) {
-            if (!c.deleted && ++count == k) {
-                c.deleted = true;
-                return;
-            }
+            if (!c.deleted && ++count == k) { c.deleted = true; return; }
         }
+    }
+
+    // Remove by stable character ID — use this for network protocol.
+    void remove_by_id(int node_id, int seq) {
+        for (auto& c : chars_)
+            if (c.node_id == node_id && c.seq == seq) { c.deleted = true; return; }
     }
 
     void merge(const RGA& other) {
@@ -61,10 +80,17 @@ public:
         return s;
     }
 
+    // Left-anchor IDs for inserting after position k (pass k = pos - 1).
     int left_node_id_at(int k) const { return k < 0 ? -1 : id_at(k).first; }
     int left_seq_at(int k)     const { return k < 0 ? -1 : id_at(k).second; }
 
-    int get_node_id() const { return node_id_; }
+    // Stable ID of the visible character at position k — use before remove_by_id.
+    int node_id_at(int k) const { return k < 0 ? -1 : id_at(k).first; }
+    int seq_at(int k)     const { return k < 0 ? -1 : id_at(k).second; }
+
+    int get_node_id()         const { return node_id_; }
+    int last_insert_seq()     const { return last_seq_; }
+    int last_insert_lamport() const { return last_lamport_; }
 
     std::string chars_json() const {
         std::string out = "[";
@@ -90,14 +116,15 @@ public:
                  + ",\"d\":"  + (c.deleted ? "true" : "false")
                  + "}";
         }
-        out += "]";
-        return out;
+        return out + "]";
     }
 
 private:
     int  node_id_;
     int  next_seq_;
     int  clock_;
+    int  last_seq_;
+    int  last_lamport_;
     std::vector<RGAChar> chars_;
 
     bool has(int nid, int seq) const {
@@ -126,8 +153,7 @@ private:
 
         while (insert_at < (int)chars_.size()) {
             const auto& d = chars_[insert_at];
-            int d_left_idx = find_idx(d.left_node_id, d.left_seq);
-            if (d_left_idx < left_idx) break;
+            if (find_idx(d.left_node_id, d.left_seq) < left_idx) break;
             if (d.lamport > c.lamport || (d.lamport == c.lamport && d.node_id > c.node_id))
                 insert_at++;
             else

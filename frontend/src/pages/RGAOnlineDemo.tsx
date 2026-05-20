@@ -1,45 +1,78 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { createRGA, type RGAHandle } from '@/lib/crdt'
+import { loadModule, type WasmModule } from '@/lib/wasm-loader'
+import type { RGAHandle } from '@/lib/crdt'
 import { ConnectionBar } from '@/components/RoomBanner'
 import { useConnection } from '@/lib/room'
 
+interface RGAChar { n: number; s: number; l: number; ln: number; ls: number; v: string; d: boolean }
+interface InitMsg   { type: 'rga_init';   node_id: number; chars: RGAChar[] }
+interface InsertMsg { type: 'rga_insert'; left_node_id: number; left_seq: number; char: string; node_id: number; seq: number; lamport: number }
+interface RemoveMsg { type: 'rga_remove'; node_id: number; seq: number }
+type RGAMsg = InitMsg | InsertMsg | RemoveMsg
+
 export default function RGAOnline() {
   const navigate = useNavigate()
-  const connection = useConnection()
-  const ref = useRef<RGAHandle | null>(null)
+  const ref       = useRef<RGAHandle | null>(null)
+  const moduleRef = useRef<WasmModule | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const [text, setText] = useState('')
+  const [text, setText]   = useState('')
   const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // The server will assign a real nodeId on connect.
-    // nodeId=0 is a stub for offline use.
-    createRGA(0)
-      .then(rga => { ref.current = rga; setText(rga.text()); setReady(true) })
+    loadModule()
+      .then(m => { moduleRef.current = m })
       .catch(e => setError(String(e)))
     return () => { ref.current?.delete() }
   }, [])
 
-  // TODO: room.onOp(op => {
-  //   if (op.type === 'rga_insert') ref.current?.insert_with_id(op.leftNodeId, op.leftSeq, op.char, op.nodeId, op.seq, op.lamport)
-  //   if (op.type === 'rga_remove') ref.current?.remove_by_id(op.nodeId, op.seq)
-  //   setText(ref.current?.text() ?? '')
-  // })
-  // Note: insert_with_id and remove_by_id need to be added to the C++ WASM bindings.
+  const onMessage = useCallback((raw: unknown) => {
+    const msg = raw as RGAMsg
+    const M   = moduleRef.current
+    if (!M) return
+
+    if (msg.type === 'rga_init') {
+      ref.current?.delete()
+      const rga = new M.RGA(msg.node_id) as RGAHandle
+      ref.current = rga
+      for (const c of msg.chars) {
+        rga.insert_remote(c.ln, c.ls, c.v, c.n, c.s, c.l)
+        if (c.d) rga.remove_by_id(c.n, c.s)
+      }
+      setText(rga.text())
+      setReady(true)
+      return
+    }
+
+    const rga = ref.current
+    if (!rga) return
+
+    if (msg.type === 'rga_insert') {
+      rga.insert_remote(msg.left_node_id, msg.left_seq, msg.char, msg.node_id, msg.seq, msg.lamport)
+    } else if (msg.type === 'rga_remove') {
+      rga.remove_by_id(msg.node_id, msg.seq)
+    }
+    setText(rga.text())
+  }, [])
+
+  const connection = useConnection('/rga', onMessage)
 
   function deleteRange(rga: RGAHandle, from: number, to: number) {
-    for (let k = to - 1; k >= from; k--)
+    for (let k = to - 1; k >= from; k--) {
+      const nid = rga.node_id_at(k)
+      const seq = rga.seq_at(k)
       rga.remove_at(k)
+      connection.send({ type: 'rga_remove', node_id: nid, seq })
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     const rga = ref.current
-    if (!rga) return
-    const el = e.currentTarget
+    if (!rga || !ready) return
+    const el    = e.currentTarget
     const start = el.selectionStart ?? 0
     const end   = el.selectionEnd   ?? 0
     const hasSel = start !== end
@@ -52,15 +85,20 @@ export default function RGAOnline() {
         requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = start })
       } else if (e.key === 'Backspace') {
         if (start === 0) return
+        const nid = rga.node_id_at(start - 1)
+        const seq = rga.seq_at(start - 1)
         rga.remove_at(start - 1)
         setText(rga.text())
+        connection.send({ type: 'rga_remove', node_id: nid, seq })
         requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = start - 1 })
       } else {
+        const nid = rga.node_id_at(start)
+        const seq = rga.seq_at(start)
         rga.remove_at(start)
         setText(rga.text())
+        connection.send({ type: 'rga_remove', node_id: nid, seq })
         requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = start })
       }
-      // TODO: room.send remove op(s)
     } else {
       const char = e.key === 'Enter' ? '\n' : (e.key.length === 1 ? e.key : null)
       if (!char || e.ctrlKey || e.metaKey || e.altKey) return
@@ -68,17 +106,25 @@ export default function RGAOnline() {
       let pos = start
       if (hasSel) { deleteRange(rga, start, end); pos = start }
       rga.insert(rga.left_node_id_at(pos - 1), rga.left_seq_at(pos - 1), char)
+      connection.send({
+        type: 'rga_insert',
+        left_node_id: rga.left_node_id_at(pos - 1),
+        left_seq:     rga.left_seq_at(pos - 1),
+        char,
+        node_id: rga.get_node_id(),
+        seq:     rga.last_insert_seq(),
+        lamport: rga.last_insert_lamport(),
+      })
       setText(rga.text())
       requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = pos + 1 })
-      // TODO: room.send insert op (needs insert_with_id return value from WASM)
     }
   }
 
   function handlePaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
     e.preventDefault()
     const rga = ref.current
-    if (!rga) return
-    const el = e.currentTarget
+    if (!rga || !ready) return
+    const el    = e.currentTarget
     const start = el.selectionStart ?? 0
     const end   = el.selectionEnd   ?? 0
     const pasted = e.clipboardData.getData('text')
@@ -86,12 +132,22 @@ export default function RGAOnline() {
     let pos = start
     if (start !== end) { deleteRange(rga, start, end); pos = start }
     for (const char of pasted) {
-      rga.insert(rga.left_node_id_at(pos - 1), rga.left_seq_at(pos - 1), char)
+      const leftNid = rga.left_node_id_at(pos - 1)
+      const leftSeq = rga.left_seq_at(pos - 1)
+      rga.insert(leftNid, leftSeq, char)
+      connection.send({
+        type: 'rga_insert',
+        left_node_id: leftNid,
+        left_seq:     leftSeq,
+        char,
+        node_id: rga.get_node_id(),
+        seq:     rga.last_insert_seq(),
+        lamport: rga.last_insert_lamport(),
+      })
       pos++
     }
     setText(rga.text())
     requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = pos })
-    // TODO: room.send insert ops
   }
 
   if (error) return (
@@ -111,13 +167,15 @@ export default function RGAOnline() {
       <ConnectionBar connection={connection} />
 
       <p className="text-muted-foreground text-sm max-w-lg text-center">
-        Edit the document. When connected, other users' keystrokes appear automatically via
-        operation-based RGA sync — each character has a stable unique ID so concurrent edits
-        merge without conflicts.
+        Edit the document. Other users' keystrokes appear automatically. Disconnect to
+        simulate a network partition — your edits are queued locally. Reconnect to
+        converge.
       </p>
 
-      {!ready ? (
-        <p className="text-muted-foreground">Loading WASM module…</p>
+      {connection.status === 'offline' ? (
+        <p className="text-muted-foreground">Connecting to server…</p>
+      ) : !ready ? (
+        <p className="text-muted-foreground">Waiting for server state…</p>
       ) : (
         <Card className="w-full max-w-2xl">
           <CardContent className="flex flex-col gap-2 pt-4 pb-4">

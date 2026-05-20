@@ -1,44 +1,45 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { createGCounter, type GCounterHandle } from '@/lib/crdt'
 import { ConnectionBar } from '@/components/RoomBanner'
 import { useConnection } from '@/lib/room'
 
+interface InitMsg      { type: 'gcounter_init';      node_id: number; slots: Record<string, number> }
+interface IncrementMsg { type: 'gcounter_increment'; node_id: number; delta: number }
+type GCMsg = InitMsg | IncrementMsg
+
 export default function GCounterOnline() {
   const navigate = useNavigate()
-  const connection = useConnection()
-  const ref = useRef<GCounterHandle | null>(null)
-  const [value, setValue] = useState(0)
+  const nodeId = useRef<number>(-1)
+  const [slots, setSlots] = useState<Map<number, number>>(new Map())
   const [ready, setReady] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    // The server will assign a real nodeId and N on connect.
-    // nodeId=0, N=1 is a stub for offline use.
-    createGCounter(0, 1)
-      .then(c => { ref.current = c; setValue(c.value()); setReady(true) })
-      .catch(e => setError(String(e)))
-    return () => { ref.current?.delete() }
+  const onMessage = useCallback((raw: unknown) => {
+    const msg = raw as GCMsg
+    if (msg.type === 'gcounter_init') {
+      nodeId.current = msg.node_id
+      setSlots(new Map(Object.entries(msg.slots).map(([k, v]) => [Number(k), v])))
+      setReady(true)
+    } else if (msg.type === 'gcounter_increment') {
+      setSlots(prev => {
+        const next = new Map(prev)
+        next.set(msg.node_id, (next.get(msg.node_id) ?? 0) + msg.delta)
+        return next
+      })
+    }
   }, [])
 
+  const connection = useConnection('/gcounter', onMessage)
+
   function increment() {
-    ref.current?.increment(1)
-    setValue(ref.current?.value() ?? 0)
-    // TODO: room.send({ type: 'gcounter_increment', nodeId, delta: 1 })
+    const nid = nodeId.current
+    if (nid < 0) return
+    setSlots(prev => { const m = new Map(prev); m.set(nid, (m.get(nid) ?? 0) + 1); return m })
+    connection.send({ type: 'gcounter_increment', node_id: nid, delta: 1 })
   }
 
-  // TODO: room.onOp(op => {
-  //   if (op.type === 'gcounter_increment') { /* merge slot */ }
-  //   setValue(ref.current?.value() ?? 0)
-  // })
-
-  if (error) return (
-    <div className="flex items-center justify-center min-h-screen text-destructive">
-      Failed to load WASM module: {error}
-    </div>
-  )
+  const total = Array.from(slots.values()).reduce((a, b) => a + b, 0)
 
   return (
     <div className="flex flex-col items-center min-h-screen gap-6 p-8">
@@ -51,16 +52,21 @@ export default function GCounterOnline() {
       <ConnectionBar connection={connection} />
 
       <p className="text-muted-foreground text-sm max-w-md text-center">
-        Increment your counter. When connected, other users' increments merge in automatically —
-        the total is the element-wise max across all nodes.
+        Each user increments their own slot. The total is the sum across all nodes.
+        Disconnect to diverge, reconnect to converge.
       </p>
 
       {!ready ? (
-        <p className="text-muted-foreground">Loading WASM module…</p>
+        <p className="text-muted-foreground">
+          {connection.status === 'offline' ? 'Connecting to server…' : 'Waiting for server state…'}
+        </p>
       ) : (
-        <Card className="w-48">
+        <Card className="w-56">
           <CardContent className="flex flex-col items-center gap-4 pt-6 pb-6">
-            <div className="text-6xl font-mono font-bold">{value}</div>
+            <div className="text-6xl font-mono font-bold">{total}</div>
+            <div className="text-xs text-muted-foreground font-mono">
+              [{Array.from(slots.entries()).sort(([a],[b]) => a-b).map(([,v]) => v).join(', ')}]
+            </div>
             <Button onClick={increment} className="w-full" size="lg">+ Increment</Button>
           </CardContent>
         </Card>
