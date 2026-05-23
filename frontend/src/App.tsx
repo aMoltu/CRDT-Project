@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
+import About from './pages/About'
 import GCounterDemo from './pages/GCounterDemo'
 import GSetDemo from './pages/GSetDemo'
 import RGADemo from './pages/RGADemo'
@@ -12,6 +13,7 @@ export default function App() {
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/gcounter" element={<GCounterDemo />} />
         <Route path="/gset" element={<GSetDemo />} />
         <Route path="/rga" element={<RGADemo />} />

@@ -32,9 +32,14 @@ export default function Home() {
         ))}
       </div>
 
-      <p className="text-xs text-muted-foreground max-w-xs text-center">
-        Online demos show your own replica. Multiplayer sync requires a WebSocket server.
-      </p>
+      <div className="flex flex-col items-center gap-2">
+        <Button variant="ghost" size="sm" onClick={() => navigate('/about')}>
+          What is a CRDT? →
+        </Button>
+        <p className="text-xs text-muted-foreground max-w-xs text-center">
+          Online demos show your own replica. Multiplayer sync requires a WebSocket server.
+        </p>
+      </div>
     </div>
   )
 }
