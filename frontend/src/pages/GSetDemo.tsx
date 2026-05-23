@@ -91,7 +91,7 @@ function NodeCanvas({ label, nodeIndex: i, state, onDraw, onMerge, disabled }: N
         <canvas
           ref={canvasRef}
           width={240}
-          height={220}
+          height={180}
           className="border border-border rounded-md cursor-crosshair bg-background"
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
@@ -182,7 +182,7 @@ export default function GSetDemo() {
   )
 
   return (
-    <div className="flex flex-col items-center min-h-screen gap-8 p-8">
+    <div className="flex flex-col items-center min-h-screen gap-4 p-4">
       <div className="flex items-center justify-between w-full max-w-4xl">
         <Button variant="ghost" onClick={() => navigate('/')}>← Back</Button>
         <h1 className="text-2xl font-bold">G-Set Canvas</h1>

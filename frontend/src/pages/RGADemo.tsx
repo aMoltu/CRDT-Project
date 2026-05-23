@@ -156,7 +156,7 @@ export default function RGADemo() {
   )
 
   return (
-    <div className="flex flex-col items-center min-h-screen gap-8 p-8">
+    <div className="flex flex-col items-center min-h-screen gap-4 p-4">
       <div className="flex items-center justify-between w-full max-w-4xl">
         <Button variant="ghost" onClick={() => navigate('/')}>← Back</Button>
         <h1 className="text-2xl font-bold">RGA Text Editor</h1>
@@ -187,7 +187,7 @@ export default function RGADemo() {
                     onChange={() => {}}
                     onKeyDown={e => handleKeyDown(e, i)}
                     onPaste={e => handlePaste(e, i)}
-                    rows={10}
+                    rows={8}
                     className="w-full resize-none rounded-md border border-border bg-background p-2 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-ring"
                     placeholder={`Type here as Node ${LABELS[i]}…`}
                     spellCheck={false}

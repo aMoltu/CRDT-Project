@@ -80,7 +80,7 @@ export default function GSetOnline() {
   function onMouseUp() { drawing.current = false; last.current = null }
 
   return (
-    <div className="flex flex-col items-center min-h-screen gap-6 p-8">
+    <div className="flex flex-col items-center min-h-screen gap-4 p-4">
       <div className="flex items-center justify-between w-full max-w-2xl">
         <Button variant="ghost" onClick={() => navigate('/')}>← Back</Button>
         <h1 className="text-2xl font-bold">G-Set Canvas — Online</h1>

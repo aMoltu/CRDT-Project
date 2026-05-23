@@ -91,7 +91,7 @@ export default function GCounterDemo() {
   )
 
   return (
-    <div className="flex flex-col items-center min-h-screen gap-8 p-8">
+    <div className="flex flex-col items-center min-h-screen gap-4 p-4">
       <div className="flex items-center justify-between w-full max-w-3xl">
         <Button variant="ghost" onClick={() => navigate('/')}>← Back</Button>
         <h1 className="text-2xl font-bold">G-Counter</h1>

@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-8 p-8">
       <div className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight">CRDT Zoo</h1>
+        <h1 className="text-4xl font-bold tracking-tight">CRDT Demo</h1>
         <p className="text-muted-foreground text-lg mt-2">Explore conflict-free replicated data types</p>
       </div>
 

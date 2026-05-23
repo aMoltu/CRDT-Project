@@ -157,7 +157,7 @@ export default function RGAOnline() {
   )
 
   return (
-    <div className="flex flex-col items-center min-h-screen gap-6 p-8">
+    <div className="flex flex-col items-center min-h-screen gap-4 p-4">
       <div className="flex items-center justify-between w-full max-w-2xl">
         <Button variant="ghost" onClick={() => navigate('/')}>← Back</Button>
         <h1 className="text-2xl font-bold">RGA Text Editor — Online</h1>
@@ -185,7 +185,7 @@ export default function RGAOnline() {
               onChange={() => {}}
               onKeyDown={handleKeyDown}
               onPaste={handlePaste}
-              rows={16}
+              rows={12}
               className="w-full resize-none rounded-md border border-border bg-background p-3 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-ring"
               placeholder="Start typing…"
               spellCheck={false}
