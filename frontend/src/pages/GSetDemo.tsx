@@ -190,8 +190,8 @@ export default function GSetDemo() {
       </div>
 
       <p className="text-muted-foreground text-sm max-w-md text-center">
-        Each node accumulates strokes independently. Merge copies all strokes from the
-        other node — a G-Set only grows, never shrinks.
+        Each replica accumulates strokes independently. Merge copies all strokes from the
+        other replica, but ignores duplicate values. A G-Set only grows, never shrinks.
       </p>
 
       {!ready ? (

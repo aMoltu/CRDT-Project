@@ -37,7 +37,7 @@ export default function Home() {
           What is a CRDT? →
         </Button>
         <p className="text-xs text-muted-foreground max-w-xs text-center">
-          Online demos show your own replica. Multiplayer sync requires a WebSocket server.
+          The local demo lets you experiment with multiple replicas. The online demo shows how CRDTs can be used in real applications.
         </p>
       </div>
     </div>

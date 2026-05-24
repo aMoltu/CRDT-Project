@@ -99,8 +99,9 @@ export default function GCounterDemo() {
       </div>
 
       <p className="text-muted-foreground text-sm max-w-md text-center">
-        Each node only increments its own slot. Merge takes the element-wise max.
-        Nodes diverge until they exchange state.
+        Each node can only increment its own slot in the counter. When two nodes merge,
+        each slot keeps its highest value, so no increment is ever lost. Try incrementing
+        different nodes, then merge them to see the counts combine.
       </p>
 
       {!ready ? (

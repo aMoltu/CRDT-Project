@@ -167,7 +167,7 @@ export default function RGADemo() {
         Each node edits its own copy independently. Characters get stable unique IDs so
         concurrent inserts can be merged without conflicts. When two nodes insert at the
         same position, the more recently typed text comes first, determined by a Lamport
-        clock. Diverge the nodes, then sync.
+        clock. A tree structure is used behind the scenes to organize this.
       </p>
 
       {!ready ? (

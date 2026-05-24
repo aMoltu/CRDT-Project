@@ -167,9 +167,8 @@ export default function RGAOnline() {
       <ConnectionBar connection={connection} />
 
       <p className="text-muted-foreground text-sm max-w-lg text-center">
-        Edit the document. Other users' keystrokes appear automatically. Disconnect to
-        simulate a network partition — your edits are queued locally. Reconnect to
-        converge.
+        Edit the document and your changes will appear for other users in real time.
+        Disconnect to edit independently. When you reconnect, all edits will be merged automatically.
       </p>
 
       {connection.status === 'offline' ? (

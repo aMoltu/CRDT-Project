@@ -52,8 +52,9 @@ export default function GCounterOnline() {
       <ConnectionBar connection={connection} />
 
       <p className="text-muted-foreground text-sm max-w-md text-center">
-        Each user increments their own slot. The total is the sum across all nodes.
-        Disconnect to diverge, reconnect to converge.
+        Each user has their own slot in the counter. The total shown is the sum across
+        all slots. Disconnect to increment independently, then reconnect to see
+        everything add up.
       </p>
 
       {!ready ? (

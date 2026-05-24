@@ -90,8 +90,8 @@ export default function GSetOnline() {
       <ConnectionBar connection={connection} />
 
       <p className="text-muted-foreground text-sm max-w-md text-center">
-        Draw on the canvas. Other users' strokes appear automatically.
-        Disconnect to draw independently, reconnect to merge.
+        Draw on the canvas and your strokes will appear for other users automatically.
+        Disconnect to draw without syncing, then reconnect to see all strokes combined.
       </p>
 
       {!ready ? (
