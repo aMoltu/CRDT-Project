@@ -6,12 +6,30 @@ import type { LineSegment } from '@/lib/crdt'
 import { ConnectionBar } from '@/components/RoomBanner'
 import { useConnection } from '@/lib/room'
 
-const MY_COLOR = { r: 200, g: 80, b: 80 }
 const WIDTH = 4
+
+function randomColor() {
+  const h = Math.random()
+  const s = 0.75, v = 0.85
+  const i = Math.floor(h * 6)
+  const f = h * 6 - i
+  const p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s)
+  let r: number, g: number, b: number
+  switch (i % 6) {
+    case 0: r = v; g = t; b = p; break
+    case 1: r = q; g = v; b = p; break
+    case 2: r = p; g = v; b = t; break
+    case 3: r = p; g = q; b = v; break
+    case 4: r = t; g = p; b = v; break
+    default: r = v; g = p; b = q; break
+  }
+  return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) }
+}
 
 interface InitMsg   { type: 'gset_init';   segments: LineSegment[] }
 interface InsertMsg { type: 'gset_insert'; seg: LineSegment }
-type GSetMsg = InitMsg | InsertMsg
+interface ResetMsg  { type: 'gset_reset' }
+type GSetMsg = InitMsg | InsertMsg | ResetMsg
 
 function redraw(canvas: HTMLCanvasElement, segments: LineSegment[]) {
   const ctx = canvas.getContext('2d')!
@@ -33,6 +51,7 @@ export default function GSetOnline() {
   const segments   = useRef<LineSegment[]>([])
   const drawing    = useRef(false)
   const last       = useRef<{ x: number; y: number } | null>(null)
+  const myColor    = useRef(randomColor())
   const [count, setCount] = useState(0)
   const [ready, setReady] = useState(false)
 
@@ -50,12 +69,14 @@ export default function GSetOnline() {
     } else if (msg.type === 'gset_insert') {
       segments.current = [...segments.current, msg.seg]
       repaint()
+    } else if (msg.type === 'gset_reset') {
+      segments.current = []
+      repaint()
     }
   }, [])
 
   const connection = useConnection('/gset', onMessage)
 
-  // Redraw whenever canvas mounts (e.g. after ready flips to true)
   useEffect(() => { if (ready) repaint() }, [ready])
 
   function getPos(e: React.MouseEvent<HTMLCanvasElement>) {
@@ -73,11 +94,17 @@ export default function GSetOnline() {
   function onMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
     if (!drawing.current || !last.current) return
     const pos = getPos(e)
-    addSegment({ x1: last.current.x, y1: last.current.y, x2: pos.x, y2: pos.y,
-                  r: MY_COLOR.r, g: MY_COLOR.g, b: MY_COLOR.b, width: WIDTH })
+    const { r, g, b } = myColor.current
+    addSegment({ x1: last.current.x, y1: last.current.y, x2: pos.x, y2: pos.y, r, g, b, width: WIDTH })
     last.current = pos
   }
   function onMouseUp() { drawing.current = false; last.current = null }
+
+  function reset() {
+    segments.current = []
+    repaint()
+    connection.send({ type: 'gset_reset' })
+  }
 
   return (
     <div className="flex flex-col items-center min-h-screen gap-4 p-4">
@@ -99,23 +126,35 @@ export default function GSetOnline() {
           {connection.status === 'offline' ? 'Connecting to server…' : 'Waiting for server state…'}
         </p>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 pt-4 pb-4">
-            <canvas
-              ref={canvasRef}
-              width={480}
-              height={360}
-              className="border border-border rounded-md cursor-crosshair bg-background"
-              onMouseDown={onMouseDown}
-              onMouseMove={onMouseMove}
-              onMouseUp={onMouseUp}
-              onMouseLeave={onMouseUp}
-            />
-            <div className="text-xs text-muted-foreground font-mono">
-              {count} segment{count !== 1 ? 's' : ''}
-            </div>
-          </CardContent>
-        </Card>
+        <>
+          <Card>
+            <CardContent className="flex flex-col items-center gap-3 pt-4 pb-4">
+              <canvas
+                ref={canvasRef}
+                width={480}
+                height={360}
+                className="border border-border rounded-md cursor-crosshair bg-background"
+                onMouseDown={onMouseDown}
+                onMouseMove={onMouseMove}
+                onMouseUp={onMouseUp}
+                onMouseLeave={onMouseUp}
+              />
+              <div className="flex items-center gap-3 w-full justify-between px-1">
+                <div className="text-xs text-muted-foreground font-mono">
+                  {count} segment{count !== 1 ? 's' : ''}
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  Your colour
+                  <span
+                    className="inline-block w-3 h-3 rounded-full border border-border"
+                    style={{ backgroundColor: `rgb(${myColor.current.r},${myColor.current.g},${myColor.current.b})` }}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Button onClick={reset} variant="outline">↺ Reset for everyone</Button>
+        </>
       )}
     </div>
   )

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,6 +18,17 @@ export default function RGADemo() {
   const [texts, setTexts] = useState<string[]>(['', '', ''])
   const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const desiredCursors = useRef<(number | null)[]>([null, null, null])
+
+  useLayoutEffect(() => {
+    desiredCursors.current.forEach((pos, i) => {
+      if (pos !== null && textareaRefs[i].current) {
+        textareaRefs[i].current.selectionStart = pos
+        textareaRefs[i].current.selectionEnd = pos
+        desiredCursors.current[i] = null
+      }
+    })
+  })
 
   function refresh() {
     setTexts(refs.current.map(r => r ? r.text() : ''))
@@ -62,16 +73,16 @@ export default function RGADemo() {
       if (hasSelection) {
         deleteRange(rga, start, end)
         refreshNode(i)
-        requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = start })
+        desiredCursors.current[i] = start
       } else if (e.key === 'Backspace') {
         if (start === 0) return
         rga.remove_at(start - 1)
         refreshNode(i)
-        requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = start - 1 })
+        desiredCursors.current[i] = start - 1
       } else {
         rga.remove_at(start)
         refreshNode(i)
-        requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = start })
+        desiredCursors.current[i] = start
       }
 
     } else {
@@ -85,7 +96,7 @@ export default function RGADemo() {
       }
       rga.insert(rga.left_node_id_at(pos - 1), rga.left_seq_at(pos - 1), char)
       refreshNode(i)
-      requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = pos + 1 })
+      desiredCursors.current[i] = pos + 1
     }
   }
 
@@ -113,7 +124,7 @@ export default function RGADemo() {
     }
 
     refreshNode(i)
-    requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = pos })
+    desiredCursors.current[i] = pos
   }
 
   function mergeInto(target: number, source: number) {

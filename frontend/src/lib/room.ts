@@ -21,6 +21,7 @@ const WS_BASE = import.meta.env.VITE_WS_URL ?? 'ws://localhost:8080'
 export function useConnection(
   path: string,
   onMessage: (msg: unknown) => void,
+  enabled = true,
 ): ConnectionHandle {
   const [status, setStatus] = useState<ConnectionStatus>('connecting')
   const ws          = useRef<WebSocket | null>(null)
@@ -31,6 +32,8 @@ export function useConnection(
   useLayoutEffect(() => { onMsgRef.current = onMessage })
 
   useEffect(() => {
+    if (!enabled) return
+
     const socket = new WebSocket(`${WS_BASE}${path}`)
     ws.current = socket
 
@@ -47,7 +50,7 @@ export function useConnection(
     socket.onerror  = () => setStatus('offline')
 
     return () => socket.close()
-  }, [path])
+  }, [path, enabled])
 
   const send = useCallback((msg: unknown) => {
     if (partitioned.current) { sendQueue.current.push(msg); return }
@@ -63,9 +66,15 @@ export function useConnection(
   const reconnect = useCallback(() => {
     partitioned.current = false
     setStatus('connected')
-    // Replay buffered incoming messages first, then flush outgoing queue
+    // Replay buffered incoming messages first, then flush outgoing queue.
+    // If a reset arrived while partitioned, discard queued outgoing ops —
+    // they reference pre-reset state and would corrupt the shared document.
     const incoming = recvBuffer.current.splice(0)
-    for (const msg of incoming) onMsgRef.current(msg)
+    for (const msg of incoming) {
+      onMsgRef.current(msg)
+      if ((msg as { type?: string }).type?.endsWith('_reset'))
+        sendQueue.current = []
+    }
     const outgoing = sendQueue.current.splice(0)
     if (ws.current?.readyState === WebSocket.OPEN)
       for (const msg of outgoing) ws.current.send(JSON.stringify(msg))

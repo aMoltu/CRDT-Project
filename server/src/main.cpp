@@ -47,13 +47,19 @@ void mount_gcounter(uWS::App& app, GCounterRoom& room) {
         .message = [&room](auto* ws, std::string_view data, uWS::OpCode) {
             try {
                 json op = json::parse(data);
-                if (op.value("type", "") != "gcounter_increment") return;
-                int nid   = op["node_id"].get<int>();
-                int delta = op["delta"].get<int>();
-                if (delta > 0) room.slots[nid] += delta;
-                std::string out = op.dump();
-                for (auto* c : room.clients)
-                    if (c != ws) c->send(out, uWS::OpCode::TEXT);
+                std::string type = op.value("type", "");
+                if (type == "gcounter_increment") {
+                    int nid   = op["node_id"].get<int>();
+                    int delta = op["delta"].get<int>();
+                    if (delta > 0) room.slots[nid] += delta;
+                    std::string out = op.dump();
+                    for (auto* c : room.clients)
+                        if (c != ws) c->send(out, uWS::OpCode::TEXT);
+                } else if (type == "gcounter_reset") {
+                    for (auto& [id, v] : room.slots) v = 0;
+                    std::string out = json{{"type", "gcounter_reset"}}.dump();
+                    for (auto* c : room.clients) c->send(out, uWS::OpCode::TEXT);
+                }
             } catch (...) {}
         },
         .close = [&room](auto* ws, int, std::string_view) {
@@ -92,17 +98,23 @@ void mount_gset(uWS::App& app, GSetRoom& room) {
         .message = [&room](auto* ws, std::string_view data, uWS::OpCode) {
             try {
                 json op = json::parse(data);
-                if (op.value("type", "") != "gset_insert") return;
-                auto& s = op["seg"];
-                room.segments.push_back({
-                    s["x1"].get<float>(), s["y1"].get<float>(),
-                    s["x2"].get<float>(), s["y2"].get<float>(),
-                    s["r"].get<float>(),  s["g"].get<float>(),
-                    s["b"].get<float>(),  s["width"].get<float>()
-                });
-                std::string out = op.dump();
-                for (auto* c : room.clients)
-                    if (c != ws) c->send(out, uWS::OpCode::TEXT);
+                std::string type = op.value("type", "");
+                if (type == "gset_insert") {
+                    auto& s = op["seg"];
+                    room.segments.push_back({
+                        s["x1"].get<float>(), s["y1"].get<float>(),
+                        s["x2"].get<float>(), s["y2"].get<float>(),
+                        s["r"].get<float>(),  s["g"].get<float>(),
+                        s["b"].get<float>(),  s["width"].get<float>()
+                    });
+                    std::string out = op.dump();
+                    for (auto* c : room.clients)
+                        if (c != ws) c->send(out, uWS::OpCode::TEXT);
+                } else if (type == "gset_reset") {
+                    room.segments.clear();
+                    std::string out = json{{"type", "gset_reset"}}.dump();
+                    for (auto* c : room.clients) c->send(out, uWS::OpCode::TEXT);
+                }
             } catch (...) {}
         },
         .close = [&room](auto* ws, int, std::string_view) {
@@ -158,6 +170,11 @@ void mount_rga(uWS::App& app, RGARoom& room) {
                         op["node_id"].get<int>(),
                         op["seq"].get<int>()
                     );
+                } else if (type == "rga_reset") {
+                    room.rga = RGA{0};
+                    std::string out = json{{"type", "rga_reset"}}.dump();
+                    for (auto* c : room.clients) c->send(out, uWS::OpCode::TEXT);
+                    return;
                 } else return;
 
                 std::string out = op.dump();
