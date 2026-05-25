@@ -5,13 +5,13 @@
 #include <algorithm>
 
 struct RGAChar {
-    int  node_id;
-    int  seq;
-    int  lamport;
-    int  left_node_id;  // -1 = start of document
-    int  left_seq;
-    char value;
-    bool deleted;
+    int         node_id;
+    int         seq;
+    int         lamport;
+    int         left_node_id;  // -1 = start of document
+    int         left_seq;
+    std::string value;
+    bool        deleted;
 };
 
 class RGA {
@@ -24,7 +24,7 @@ public:
     // to get the assigned IDs for broadcasting over the network.
     void insert(int left_node_id, int left_seq, const std::string& value) {
         if (value.empty()) return;
-        RGAChar c{ node_id_, next_seq_++, ++clock_, left_node_id, left_seq, value[0], false };
+        RGAChar c{ node_id_, next_seq_++, ++clock_, left_node_id, left_seq, value, false };
         last_seq_     = c.seq;
         last_lamport_ = c.lamport;
         place(c);
@@ -34,7 +34,7 @@ public:
     void insert_remote(int left_node_id, int left_seq, const std::string& value,
                        int node_id, int seq, int lamport) {
         if (value.empty() || has(node_id, seq)) return;
-        RGAChar c{ node_id, seq, lamport, left_node_id, left_seq, value[0], false };
+        RGAChar c{ node_id, seq, lamport, left_node_id, left_seq, value, false };
         clock_ = std::max(clock_, lamport);
         place(c);
     }
@@ -99,13 +99,15 @@ public:
             if (!first) out += ",";
             first = false;
             std::string esc;
-            switch (c.value) {
-                case '"':  esc = "\\\""; break;
-                case '\\': esc = "\\\\"; break;
-                case '\n': esc = "\\n";  break;
-                case '\r': esc = "\\r";  break;
-                case '\t': esc = "\\t";  break;
-                default:   esc = std::string(1, c.value);
+            for (char ch : c.value) {
+                switch (ch) {
+                    case '"':  esc += "\\\""; break;
+                    case '\\': esc += "\\\\"; break;
+                    case '\n': esc += "\\n";  break;
+                    case '\r': esc += "\\r";  break;
+                    case '\t': esc += "\\t";  break;
+                    default:   esc += ch;
+                }
             }
             out += "{\"n\":"  + std::to_string(c.node_id)
                  + ",\"s\":"  + std::to_string(c.seq)
