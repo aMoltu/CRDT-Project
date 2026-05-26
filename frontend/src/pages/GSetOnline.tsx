@@ -51,7 +51,7 @@ export default function GSetOnline() {
   const segments   = useRef<LineSegment[]>([])
   const drawing    = useRef(false)
   const last       = useRef<{ x: number; y: number } | null>(null)
-  const myColor    = useRef(randomColor())
+  const [myColor]  = useState(randomColor)
   const [count, setCount] = useState(0)
   const [ready, setReady] = useState(false)
 
@@ -94,7 +94,7 @@ export default function GSetOnline() {
   function onMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
     if (!drawing.current || !last.current) return
     const pos = getPos(e)
-    const { r, g, b } = myColor.current
+    const { r, g, b } = myColor
     addSegment({ x1: last.current.x, y1: last.current.y, x2: pos.x, y2: pos.y, r, g, b, width: WIDTH })
     last.current = pos
   }
@@ -147,7 +147,7 @@ export default function GSetOnline() {
                   Your colour
                   <span
                     className="inline-block w-3 h-3 rounded-full border border-border"
-                    style={{ backgroundColor: `rgb(${myColor.current.r},${myColor.current.g},${myColor.current.b})` }}
+                    style={{ backgroundColor: `rgb(${myColor.r},${myColor.g},${myColor.b})` }}
                   />
                 </div>
               </div>
